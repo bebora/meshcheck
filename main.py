@@ -35,8 +35,11 @@ def load_tokens():
 
 def paste_not_avail(image):
     na = Image.open('not_available.png')
-    offset = (430-320) // 2
-    image.paste(na, (offset, offset), na)
+    na_width, na_height = na.size
+    im_width, im_height = image.size
+    offset_width = (im_width - na_width) // 2
+    offset_height = (im_height - na_height) // 2
+    image.paste(na, (offset_width, offset_height), na)
     return image
 
 
@@ -49,7 +52,7 @@ def filtered_media(url, caption, img_filter):
     img = Image.open(BytesIO(r.content))
     img = img_filter(img)
     bio = BytesIO()
-    bio.name = url.split('/')[-1].lower()
+    bio.name = 'temp.jpeg'
     img.save(bio, 'JPEG')
     bio.seek(0)
     return InputMediaPhoto(bio, caption=caption)
@@ -79,7 +82,6 @@ def announce_new(bot, chat_ids, items):
         items = items[10:]
         send_album(bot, chat_ids, temp,
                    caption="{} is now available")
-    return
 
 
 def announce_removed(bot, chat_ids, items):
@@ -94,7 +96,6 @@ def announce_removed(bot, chat_ids, items):
         send_album(bot, chat_ids, temp,
                    caption="{} isn't available anymore",
                    img_filter=paste_not_avail)
-    return
 
 
 def main(mesh_id=671):
