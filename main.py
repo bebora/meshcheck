@@ -9,6 +9,7 @@ from io import BytesIO
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
+
 def load_tokens():
     try:
         with open('tokens.json', 'r') as fp:
@@ -30,14 +31,18 @@ def load_tokens():
             """)
         sys.exit()
     return bot_token, users_ids
+
+
 def paste_not_avail(image):
     na = Image.open('not_available.png')
     offset = (430-320) // 2
     image.paste(na, (offset, offset), na)
     return image
 
+
 def desaturate(image):
     return ImageEnhance.Color(image).enhance(0.25)
+
 
 def filtered_media(url, caption, img_filter):
     r = SafeGet.get(url)
@@ -48,18 +53,20 @@ def filtered_media(url, caption, img_filter):
     img.save(bio, 'JPEG')
     bio.seek(0)
     return InputMediaPhoto(bio, caption=caption)
-    
+
+
 def send_album(bot, chat_ids, items, caption, img_filter=None):
     if img_filter is None:
         medias = [InputMediaPhoto(i['img_src'],
                   caption=caption.format(i['name'])) for i in items]
     else:
         medias = [filtered_media(
-                    i['img_src'], 
-                    img_filter=paste_not_avail,
+                    i['img_src'],
+                    img_filter=img_filter,
                     caption=caption.format(i['name'])) for i in items]
     for chat in chat_ids:
-        bot.sendMediaGroup(chat_id = chat, media=medias, timeout=30)
+        bot.sendMediaGroup(chat_id=chat, media=medias, timeout=30)
+
 
 def announce_new(bot, chat_ids, items):
     if items == []:
@@ -74,6 +81,7 @@ def announce_new(bot, chat_ids, items):
                    caption="{} is now available")
     return
 
+
 def announce_removed(bot, chat_ids, items):
     if items == []:
         logging.info("Nothing removed")
@@ -85,7 +93,7 @@ def announce_removed(bot, chat_ids, items):
         items = items[10:]
         send_album(bot, chat_ids, temp,
                    caption="{} isn't available anymore",
-                   img_filter=desaturate)
+                   img_filter=paste_not_avail)
     return
 
 
