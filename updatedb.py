@@ -4,11 +4,14 @@ import json
 import requests
 import time
 import logging
+import os
 import sys
 import traceback
 from tinydb import TinyDB, Query
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
+
+cwd = os.path.dirname(os.path.abspath(__file__))
 
 
 class SafeGet():
@@ -57,10 +60,8 @@ class MeshUpdater():
                                    .strip()
                                    .replace('70x70', '430x430')
                 })
-        if len(choices) == 0:
-            logging.info("Nothing changed")
-            return {'new': [], 'removed': []}
-        db = TinyDB('colors.json')
+
+        db = TinyDB(os.path.join(cwd, 'colors.json'))
         Color = Query()
         db.update({'valid': False, 'new': False})
 
